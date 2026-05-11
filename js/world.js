@@ -87,6 +87,17 @@ function openCityModal(city) {
   document.getElementById('cityModalDesc').textContent = city.description;
   document.getElementById('cityModalDetails').textContent = city.details || '';
 
+  // Карта города
+  var cityMapEl = document.getElementById('cityModalMap');
+  if (city.cityMap) {
+    cityMapEl.innerHTML = '<img src="' + city.cityMap + '" style="width:100%;margin-top:1rem;border:1px solid var(--border);" alt="Карта ' + city.name + '">';
+    cityMapEl.style.display = 'block';
+  } else {
+    cityMapEl.innerHTML = '';
+    cityMapEl.style.display = 'none';
+  }
+
+  // Точки интереса
   var poiHtml = '';
   if (city.pointsOfInterest && city.pointsOfInterest.length) {
     poiHtml = '<div style="margin-top:1.2rem;border-top:1px solid var(--border);padding-top:1rem;">' +
