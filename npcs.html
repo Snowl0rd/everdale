@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>НПС — Эвердейл</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <a href="index.html" class="nav-brand">Эвердейл</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="world.html">Мир</a></li>
+    <li><a href="npcs.html" class="active">НПС</a></li>
+    <li><a href="pantheon.html">Пантеон</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle">☰</button>
+</nav>
+
+<div class="page-wrap">
+  <div class="container">
+    <div class="page-hero">
+      <span class="page-hero__tag">Персонажи мира</span>
+      <h1 class="page-hero__title">НПС</h1>
+      <p class="page-hero__sub">Те, с кем странники пересекались на своём пути</p>
+    </div>
+
+    <!-- Поиск и фильтры -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="npcSearch" placeholder="Поиск по имени...">
+    </div>
+
+    <div class="filters" id="npcFilters">
+      <button class="filter-btn active" data-tag="all">Все</button>
+    </div>
+
+    <div class="npc-grid" id="npcGrid">
+      <!-- Заполняется через JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно -->
+<div class="modal-overlay" id="npcModal">
+  <div class="modal" id="modalContent">
+    <button class="modal__close" id="modalClose">✕</button>
+    <div id="modalImg"></div>
+    <div class="modal__content">
+      <div class="modal__name" id="modalName"></div>
+      <div class="modal__race" id="modalRace"></div>
+      <div class="modal__role" id="modalRole"></div>
+      <p class="modal__desc" id="modalDesc"></p>
+      <div class="tags" id="modalTags"></div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  Эвердейл · Homebrew Campaign
+</footer>
+
+<script src="js/nav.js"></script>
+<script src="js/npcs.js"></script>
+</body>
+</html>

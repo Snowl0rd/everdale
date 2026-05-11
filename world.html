@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мир — Эвердейл</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Leaflet для интерактивной карты -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <a href="index.html" class="nav-brand">Эвердейл</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="world.html" class="active">Мир</a></li>
+    <li><a href="npcs.html">НПС</a></li>
+    <li><a href="pantheon.html">Пантеон</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle">☰</button>
+</nav>
+
+<div class="page-wrap">
+  <div class="container">
+    <div class="page-hero">
+      <span class="page-hero__tag">Земли Эвердейла</span>
+      <h1 class="page-hero__title">Мир</h1>
+      <p class="page-hero__sub">Города, тракты и места которые лучше обходить стороной</p>
+    </div>
+
+    <!-- Интерактивная карта -->
+    <div class="map-section">
+      <div class="map-section__title">// Карта Эвердейла</div>
+      <div id="everdale-map"></div>
+      <p style="font-size:0.75rem;color:var(--text-dim);margin-top:0.5rem;font-style:italic;">
+        Кликни на маркер города чтобы узнать подробности. Карту можно поместить в images/map.jpg.
+      </p>
+    </div>
+
+    <div class="divider">Города</div>
+
+    <!-- Карточки городов -->
+    <div class="cities-grid" id="citiesGrid">
+      <!-- Заполняется через JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно города -->
+<div class="modal-overlay" id="cityModal">
+  <div class="modal" id="cityModalContent" style="grid-template-columns:1fr;max-width:740px;">
+    <button class="modal__close" id="cityModalClose">✕</button>
+    <div id="cityModalImg"></div>
+    <div class="modal__content" style="border-left:none;border-top:1px solid var(--border);">
+      <div class="modal__name" id="cityModalName"></div>
+      <div class="modal__role" id="cityModalSubtitle"></div>
+      <p class="modal__desc" id="cityModalDesc" style="margin-bottom:0.8rem;"></p>
+      <p class="modal__desc" id="cityModalDetails"></p>
+      <div id="cityModalPOI"></div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  Эвердейл · Homebrew Campaign
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/world.js"></script>
+</body>
+</html>
