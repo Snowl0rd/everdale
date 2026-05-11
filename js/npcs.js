@@ -1,4 +1,4 @@
-// npcs.js — загрузка и отображение НПС из npcs.json
+// npcs.js
 
 const tagLabels = {
   'опасный':        { label: 'Опасный',    cls: 'tag--danger' },
@@ -6,100 +6,106 @@ const tagLabels = {
   'подозрительный': { label: 'Подозр.',    cls: 'tag--suspicious' },
 };
 
-function tagClass(tag) {
-  return tagLabels[tag]?.cls || '';
-}
+function tagCls(tag) { return tagLabels[tag] ? tagLabels[tag].cls : ''; }
+function tagLbl(tag) { return tagLabels[tag] ? tagLabels[tag].label : tag; }
 
-function tagLabel(tag) {
-  return tagLabels[tag]?.label || tag;
-}
-
-function imgOrPlaceholder(src, cls, placeholder = '👤') {
+function makeImg(src, imgClass, placeholderClass, icon) {
   if (src) {
-    return `<img src="${src}" class="${cls}" alt="" onerror="this.parentNode.innerHTML='<div class=\\"${cls.replace('__img','__img-placeholder')}\\">${placeholder}</div>'" loading="lazy">`;
+    return '<img src="' + src + '" class="' + imgClass + '" alt="" loading="lazy" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">' +
+           '<div class="' + placeholderClass + '" style="display:none">' + icon + '</div>';
   }
-  return `<div class="${cls.replace('__img','__img-placeholder')}">${placeholder}</div>`;
+  return '<div class="' + placeholderClass + '">' + icon + '</div>';
 }
 
-// ----- Отрисовка карточек -----
 function renderCards(npcs) {
-  const grid = document.getElementById('npcGrid');
+  var grid = document.getElementById('npcGrid');
   if (!grid) return;
-
-  grid.innerHTML = npcs.map(npc => `
-    <div class="npc-card" data-id="${npc.id}">
-      ${imgOrPlaceholder(npc.image, 'npc-card__img')}
-      <div class="npc-card__body">
-        <div class="npc-card__name">${npc.name}</div>
-        <div class="npc-card__race">${npc.race}</div>
-        <div class="npc-card__role">${npc.role}</div>
-        ${npc.tags?.length ? `
-          <div class="tags">
-            ${npc.tags.map(t => `<span class="tag ${tagClass(t)}">${tagLabel(t)}</span>`).join('')}
-          </div>` : ''}
-      </div>
-    </div>
-  `).join('');
-
-  grid.querySelectorAll('.npc-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const npc = npcs.find(n => n.id === card.dataset.id);
-      openModal(npc);
-    });
-  });
+  var html = '';
+  for (var i = 0; i < npcs.length; i++) {
+    var npc = npcs[i];
+    var tags = '';
+    if (npc.tags && npc.tags.length) {
+      for (var t = 0; t < npc.tags.length; t++) {
+        tags += '<span class="tag ' + tagCls(npc.tags[t]) + '">' + tagLbl(npc.tags[t]) + '</span>';
+      }
+      tags = '<div class="tags">' + tags + '</div>';
+    }
+    html += '<div class="npc-card" data-id="' + npc.id + '">' +
+      makeImg(npc.image, 'npc-card__img', 'npc-card__img-placeholder', '👤') +
+      '<div class="npc-card__body">' +
+      '<div class="npc-card__name">' + npc.name + '</div>' +
+      '<div class="npc-card__race">' + npc.race + '</div>' +
+      '<div class="npc-card__role">' + npc.role + '</div>' +
+      tags +
+      '</div></div>';
+  }
+  grid.innerHTML = html;
+  var cards = grid.querySelectorAll('.npc-card');
+  for (var c = 0; c < cards.length; c++) {
+    cards[c].addEventListener('click', (function(list) {
+      return function() {
+        var id = this.dataset.id;
+        for (var n = 0; n < list.length; n++) {
+          if (list[n].id === id) { openModal(list[n]); break; }
+        }
+      };
+    })(npcs));
+  }
 }
 
-// ----- Фильтры -----
 function buildFilters(npcs) {
-  const container = document.getElementById('npcFilters');
+  var container = document.getElementById('npcFilters');
   if (!container) return;
-
-  const allTags = [...new Set(npcs.flatMap(n => n.tags || []))];
-  allTags.forEach(tag => {
-    const btn = document.createElement('button');
+  var allTags = [];
+  for (var i = 0; i < npcs.length; i++) {
+    var tags = npcs[i].tags || [];
+    for (var t = 0; t < tags.length; t++) {
+      if (allTags.indexOf(tags[t]) === -1) allTags.push(tags[t]);
+    }
+  }
+  for (var a = 0; a < allTags.length; a++) {
+    var btn = document.createElement('button');
     btn.className = 'filter-btn';
-    btn.dataset.tag = tag;
-    btn.textContent = tagLabel(tag);
+    btn.dataset.tag = allTags[a];
+    btn.textContent = tagLbl(allTags[a]);
     container.appendChild(btn);
-  });
-
-  container.addEventListener('click', e => {
-    const btn = e.target.closest('.filter-btn');
+  }
+  container.addEventListener('click', function(e) {
+    var btn = e.target.closest('.filter-btn');
     if (!btn) return;
-
-    container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    container.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
     btn.classList.add('active');
-
-    const tag = btn.dataset.tag;
-    const search = document.getElementById('npcSearch')?.value.toLowerCase() || '';
-    filterAndRender(npcs, tag, search);
+    var search = document.getElementById('npcSearch') ? document.getElementById('npcSearch').value.toLowerCase() : '';
+    filterAndRender(npcs, btn.dataset.tag, search);
   });
 }
 
 function filterAndRender(npcs, tag, search) {
-  let result = npcs;
-  if (tag && tag !== 'all') result = result.filter(n => n.tags?.includes(tag));
-  if (search) result = result.filter(n =>
-    n.name.toLowerCase().includes(search) ||
-    n.role.toLowerCase().includes(search) ||
-    n.race.toLowerCase().includes(search)
-  );
+  var result = npcs;
+  if (tag && tag !== 'all') result = result.filter(function(n) { return n.tags && n.tags.indexOf(tag) !== -1; });
+  if (search) result = result.filter(function(n) {
+    return n.name.toLowerCase().indexOf(search) !== -1 ||
+           n.role.toLowerCase().indexOf(search) !== -1 ||
+           n.race.toLowerCase().indexOf(search) !== -1;
+  });
   renderCards(result);
 }
 
-// ----- Модал -----
 function openModal(npc) {
-  const overlay = document.getElementById('npcModal');
-
-  document.getElementById('modalImg').innerHTML =
-    imgOrPlaceholder(npc.image, 'modal__img');
+  var overlay = document.getElementById('npcModal');
+  var imgHtml = makeImg(npc.image, 'modal__img', 'modal__img-placeholder', '👤');
+  document.getElementById('modalImg').innerHTML = imgHtml;
   document.getElementById('modalName').textContent = npc.name;
   document.getElementById('modalRace').textContent = npc.race;
   document.getElementById('modalRole').textContent = npc.role;
   document.getElementById('modalDesc').textContent = npc.description;
-  document.getElementById('modalTags').innerHTML = (npc.tags || [])
-    .map(t => `<span class="tag ${tagClass(t)}">${tagLabel(t)}</span>`).join('');
-
+  var tagsHtml = '';
+  if (npc.tags) {
+    for (var t = 0; t < npc.tags.length; t++) {
+      tagsHtml += '<span class="tag ' + tagCls(npc.tags[t]) + '">' + tagLbl(npc.tags[t]) + '</span>';
+    }
+  }
+  document.getElementById('modalTags').innerHTML = tagsHtml;
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -109,38 +115,24 @@ function closeModal() {
   document.body.style.overflow = '';
 }
 
-// ----- Инициализация -----
-document.addEventListener('DOMContentLoaded', async () => {
-  let npcs = [];
-
-  try {
-    const res = await fetch('data/npcs.json');
-    npcs = await res.json();
-  } catch (e) {
-    console.error('Не удалось загрузить npcs.json', e);
-    document.getElementById('npcGrid').innerHTML =
-      '<p style="color:var(--text-dim);padding:2rem;">Ошибка загрузки данных.</p>';
-    return;
-  }
-
-  renderCards(npcs);
-  buildFilters(npcs);
-
-  // Поиск
-  const searchInput = document.getElementById('npcSearch');
-  if (searchInput) {
-    searchInput.addEventListener('input', () => {
-      const activeTag = document.querySelector('.filter-btn.active')?.dataset.tag || 'all';
-      filterAndRender(npcs, activeTag, searchInput.value.toLowerCase());
-    });
-  }
-
-  // Закрытие модала
-  document.getElementById('modalClose')?.addEventListener('click', closeModal);
-  document.getElementById('npcModal')?.addEventListener('click', e => {
-    if (e.target === e.currentTarget) closeModal();
-  });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeModal();
-  });
+document.addEventListener('DOMContentLoaded', function() {
+  fetch('data/npcs.json')
+    .then(function(r) { return r.json(); })
+    .then(function(npcs) {
+      renderCards(npcs);
+      buildFilters(npcs);
+      var searchInput = document.getElementById('npcSearch');
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          var activeTag = document.querySelector('.filter-btn.active');
+          filterAndRender(npcs, activeTag ? activeTag.dataset.tag : 'all', this.value.toLowerCase());
+        });
+      }
+      document.getElementById('modalClose').addEventListener('click', closeModal);
+      document.getElementById('npcModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+      });
+      document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+    })
+    .catch(function(e) { console.error('npcs.json error', e); });
 });

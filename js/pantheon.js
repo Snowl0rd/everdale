@@ -1,62 +1,53 @@
-// pantheon.js — загрузка и отображение богов из gods.json
+// pantheon.js
 
-function imgOrPlaceholder(src, cls, placeholder = '⚡') {
+function makeImg(src, imgClass, placeholderClass, icon) {
   if (src) {
-    return `<img src="${src}" class="${cls}" alt="" onerror="this.parentNode.innerHTML='<div class=\\"${cls.replace('__img','__img-placeholder')}\\">${placeholder}</div>'" loading="lazy">`;
+    return '<img src="' + src + '" class="' + imgClass + '" alt="" loading="lazy" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">' +
+           '<div class="' + placeholderClass + '" style="display:none">' + icon + '</div>';
   }
-  return `<div class="${cls.replace('__img','__img-placeholder')}">${placeholder}</div>`;
+  return '<div class="' + placeholderClass + '">' + icon + '</div>';
 }
 
 function renderGods(gods) {
-  const grid = document.getElementById('godsGrid');
+  var grid = document.getElementById('godsGrid');
   if (!grid) return;
-
-  grid.innerHTML = gods.map(god => `
-    <div class="god-card" data-align="${god.alignment}">
-      <div class="god-card__header">
-        ${imgOrPlaceholder(god.image, 'god-card__img')}
-        <div>
-          <div class="god-card__name">${god.name}</div>
-          <div class="god-card__domain">${god.domain}</div>
-        </div>
-      </div>
-      <div class="god-card__desc">
-        ${god.description}
-        <div class="god-card__alignment">${god.alignment}</div>
-      </div>
-    </div>
-  `).join('');
+  var html = '';
+  for (var i = 0; i < gods.length; i++) {
+    var god = gods[i];
+    html += '<div class="god-card" data-align="' + god.alignment + '">' +
+      '<div class="god-card__header">' +
+      makeImg(god.image, 'god-card__img', 'god-card__img-placeholder', '⚡') +
+      '<div>' +
+      '<div class="god-card__name">' + god.name + '</div>' +
+      '<div class="god-card__domain">' + god.domain + '</div>' +
+      '</div></div>' +
+      '<div class="god-card__desc">' + god.description +
+      '<div class="god-card__alignment">' + god.alignment + '</div>' +
+      '</div></div>';
+  }
+  grid.innerHTML = html;
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  let gods = [];
-
-  try {
-    const res = await fetch('data/gods.json');
-    gods = await res.json();
-  } catch (e) {
-    console.error('Не удалось загрузить gods.json', e);
-    return;
-  }
-
-  renderGods(gods);
-
-  // Фильтры
-  const filters = document.getElementById('godsFilters');
-  if (filters) {
-    filters.addEventListener('click', e => {
-      const btn = e.target.closest('.filter-btn');
-      if (!btn) return;
-
-      filters.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const align = btn.dataset.align;
-      if (align === 'all') {
-        renderGods(gods);
-      } else {
-        renderGods(gods.filter(g => g.alignment.includes(align)));
+document.addEventListener('DOMContentLoaded', function() {
+  fetch('data/gods.json')
+    .then(function(r) { return r.json(); })
+    .then(function(gods) {
+      renderGods(gods);
+      var filters = document.getElementById('godsFilters');
+      if (filters) {
+        filters.addEventListener('click', function(e) {
+          var btn = e.target.closest('.filter-btn');
+          if (!btn) return;
+          filters.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          var align = btn.dataset.align;
+          if (align === 'all') {
+            renderGods(gods);
+          } else {
+            renderGods(gods.filter(function(g) { return g.alignment.indexOf(align) !== -1; }));
+          }
+        });
       }
-    });
-  }
+    })
+    .catch(function(e) { console.error('gods.json error', e); });
 });
