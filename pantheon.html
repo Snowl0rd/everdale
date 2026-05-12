@@ -28,13 +28,28 @@
 
     <div class="filters" id="godsFilters">
       <button class="filter-btn active" data-align="all">Все</button>
-      <button class="filter-btn" data-align="Благой">Благие</button>
-      <button class="filter-btn" data-align="Нейтральный">Нейтральные</button>
-      <button class="filter-btn" data-align="Злой">Тёмные</button>
+      <button class="filter-btn" data-align="благой">Благие</button>
+      <button class="filter-btn" data-align="нейтральный">Нейтральные</button>
+      <button class="filter-btn" data-align="злой">Тёмные</button>
     </div>
 
-    <div class="gods-grid" id="godsGrid">
-      <!-- Заполняется через JS -->
+    <div class="gods-grid" id="godsGrid"></div>
+  </div>
+</div>
+
+<!-- Модал бога -->
+<div class="modal-overlay" id="godModal">
+  <div class="modal" style="max-width:700px;">
+    <button class="modal__close" id="godModalClose">✕</button>
+    <div id="godModalImg"></div>
+    <div class="modal__content">
+      <div class="modal__name" id="godModalName"></div>
+      <div class="modal__race" id="godModalDomain"></div>
+      <div class="modal__role" id="godModalAlignment"></div>
+      <div style="font-size:0.8rem;color:var(--gold-dim);margin-bottom:0.3rem;" id="godModalSymbol"></div>
+      <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);" id="godModalTitles"></div>
+      <div class="modal__desc" id="godModalDesc"></div>
+      <div style="font-size:0.8rem;color:var(--text-dim);margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-style:italic;" id="godModalWorship"></div>
     </div>
   </div>
 </div>
